@@ -1,12 +1,15 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import cookieParser from "cookie-parser";
 import aiRoutes from './routes/ai.routes.js';  
 import connectDb from './config/mongodb.js';
+import authRouter from './routes/authRoute.js';
+import userRouter from './routes/userRoutes.js';
 
 const app = express();  
 
-dotenv.config(); // Load environment variables from .env file
+const port = process.env.PORT || 4000;
 
 // CORS configuration
 const corsOptions = {
@@ -17,8 +20,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));  // Use the CORS middleware
-
+app.use(cookieParser());
 app.use(express.json());  // Parse incoming JSON requests
+
+app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
+
 
 // Use AI routes
 app.use('/ai', aiRoutes);
@@ -29,7 +36,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server and connect to the database
-app.listen(3000, async () => {
+app.listen(port, async () => {
     try {
         await connectDb();  // Connect to MongoDB
         console.log('Server is running on http://localhost:3000');
