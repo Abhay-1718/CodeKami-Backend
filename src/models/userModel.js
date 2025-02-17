@@ -16,15 +16,7 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: function () {
-      
-      return !this.googleId;
-    },
-  },
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true, 
+    required: true
   },
   verifyOtp: {
     type: String,

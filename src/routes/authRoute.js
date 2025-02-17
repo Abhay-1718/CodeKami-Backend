@@ -12,7 +12,7 @@ authRouter.post('/verify-account', userAuth, verifyEmail);
 authRouter.get('/is-auth', userAuth, isAuthenticated);
 authRouter.post('/send-reset-otp', sendResetOtp);
 authRouter.post('/reset-password', resetPassword);
-authRouter.post('/google', googleLogin);
+
 
 
 export default authRouter;
