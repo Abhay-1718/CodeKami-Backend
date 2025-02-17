@@ -11,9 +11,8 @@ const app = express();
 
 const port = process.env.PORT || 4000;
 
-// CORS configuration
 const corsOptions = {
-    origin: process.env.ORIGIN || 'http://localhost:5173',
+    origin: '*', // Allow all origins for testing
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
