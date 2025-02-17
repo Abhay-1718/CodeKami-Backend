@@ -2,9 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodeMailer.js";
-import { OAuth2Client } from "google-auth-library";
-import axios from "axios";
-import { google } from 'googleapis';
+
 
 
 

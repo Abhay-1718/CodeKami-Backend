@@ -16,7 +16,7 @@ const userAuth = async (req, res, next) => {
 
     if (tokenDecode.id) {
       req.user = tokenDecode;  // Store the decoded token in req.user
-      console.log('Decoded User ID:', tokenDecode.id);  // Log the decoded user ID
+    
     } else {
       return res.json({
         success: false,
