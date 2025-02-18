@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();  
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 const corsOptions = {
     origin: '*', // Allow all origins for testing
@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
 app.listen(port, async () => {
     try {
         await connectDb();  // Connect to MongoDB
-        console.log('Server is running on http://localhost:3000');
+        console.log('Server is running on http://localhost:5000');
     } catch (error) {
         console.error('Failed to start the server due to database connection issues:', error);
     }
