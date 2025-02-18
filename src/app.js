@@ -15,11 +15,15 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-    origin: '*', // Allow all origins for testing
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: 'http://15.206.179.46',  // Replace with your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
 };
+app.options('*', cors(corsOptions));  // Handle all OPTIONS requests
+
+app.use(cors(corsOptions));  // Use the updated CORS middleware
+
 
 app.use(cors(corsOptions));  // Use the CORS middleware
 app.use(cookieParser());
