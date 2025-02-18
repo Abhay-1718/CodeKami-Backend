@@ -7,11 +7,9 @@ import connectDb from './config/mongodb.js';
 import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoutes.js';
 
-
 dotenv.config();
 
 const app = express();  
-
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
@@ -20,20 +18,17 @@ const corsOptions = {
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
 };
-app.options('*', cors(corsOptions));  // Handle all OPTIONS requests
 
-app.use(cors(corsOptions));  // Use the updated CORS middleware
+// Handle all OPTIONS requests
+app.options('*', cors(corsOptions)); 
 
-
-app.use(cors(corsOptions));  // Use the CORS middleware
+// Use the CORS middleware once
+app.use(cors(corsOptions));  
 app.use(cookieParser());
 app.use(express.json());  // Parse incoming JSON requests
 
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
-
-
-// Use AI routes
 app.use('/ai', aiRoutes);
 
 // Simple root route for testing
