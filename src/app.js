@@ -15,27 +15,19 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-    origin: (origin, callback) => {
-        if (origin === 'http://localhost:5173' || origin === 'https://codekami.online') {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'), false);
-        }
-    },
+    origin: 'http://localhost:5173', // Allow only the frontend's origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  // Allow cookies and credentials to be sent
 };
 
 
-
 app.use(cors(corsOptions));  // Use the CORS middleware
 app.use(cookieParser());
 app.use(express.json());  // Parse incoming JSON requests
 
-app.use('/auth', authRouter)  // Change '/api/auth' to '/auth'
-app.use('/user', userRouter)  // Change '/api/user' to '/user'
-
+app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
 
 
 // Use AI routes
