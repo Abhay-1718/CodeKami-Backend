@@ -7,14 +7,13 @@ import connectDb from './config/mongodb.js';
 import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoutes.js';
 
-
 dotenv.config();
 
 const app = express();  
-
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
+<<<<<<< HEAD
     origin: 'http://localhost:5173', // Allow only the frontend's origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -23,14 +22,24 @@ const corsOptions = {
 
 
 app.use(cors(corsOptions));  // Use the CORS middleware
+=======
+    origin: 'http://15.206.179.46',  // Replace with your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true,
+};
+
+// Handle all OPTIONS requests
+app.options('*', cors(corsOptions)); 
+
+// Use the CORS middleware once
+app.use(cors(corsOptions));  
+>>>>>>> a9b983e0817574e859c4416302f93f961cfad7a6
 app.use(cookieParser());
 app.use(express.json());  // Parse incoming JSON requests
 
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
-
-
-// Use AI routes
 app.use('/ai', aiRoutes);
 
 // Simple root route for testing
