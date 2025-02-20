@@ -58,8 +58,6 @@ export const register = async (req, res) => {
   }
 };
 
-
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -92,7 +90,6 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    // Send token in response body
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -105,8 +102,6 @@ export const login = async (req, res) => {
     });
   }
 };
-
-
 
 export const logout = async (req, res) => {
   try {
@@ -122,14 +117,9 @@ export const logout = async (req, res) => {
   }
 };
 
-
-//send verification otp to the user's email
 export const sendVerifyOtp = async (req, res) => {
   try {
-    // The userId comes from the decoded token in userAuth middleware
     const userId = req.user.id;
-
-    // Find the user in the database using the userId
     const user = await userModel.findById(userId);
 
     if (!user) {
@@ -146,14 +136,12 @@ export const sendVerifyOtp = async (req, res) => {
       });
     }
 
-    // Generate OTP and save to user model
     const otp = String(Math.floor(100000 + Math.random() * 900000));
     user.verifyOtp = otp;
     user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
 
     await user.save();
 
-    // Send OTP email
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: user.email,
@@ -175,11 +163,8 @@ export const sendVerifyOtp = async (req, res) => {
   }
 };
 
-//verify the email using otp
 export const verifyEmail = async (req, res) => {
-  const { otp } = req.body; // Now only the otp is required from the body
-
-  // Get the userId from the authenticated token
+  const { otp } = req.body;
   const userId = req.user.id;
 
   if (!otp) {
@@ -231,8 +216,6 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-//check if user is authenticated
-//before this controller function we will execute the middleware and if the middleware will be executed after that this isauth functio will be executed and it will return the respinse sucess true
 export const isAuthenticated = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -254,7 +237,8 @@ export const isAuthenticated = async (req, res) => {
   } catch (error) {
     return res.status(401).json({ success: false, message: "Authentication failed" });
   }
-};//send password reset otp
+};
+
 export const sendResetOtp = async (req, res) => {
   const { email } = req.body;
 
@@ -284,8 +268,8 @@ export const sendResetOtp = async (req, res) => {
     const mailOption = {
       from: process.env.SENDER_EMAIL,
       to: user.email,
-      subject: "Password Reset OTP ",
-      text: `Your OTP for resetting your password is ${otp}.Use thus OTP to proceed with resetting your password.Expires in 10 minutes`,
+      subject: "Password Reset OTP",
+      text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting your password. Expires in 10 minutes.`,
     };
 
     await transporter.sendMail(mailOption);
@@ -302,15 +286,13 @@ export const sendResetOtp = async (req, res) => {
   }
 };
 
-//reset user password
-
 export const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
   if (!email || !otp || !newPassword) {
     return res.json({
       success: false,
-      message: "Email , OTP and new password are required",
+      message: "Email, OTP, and new password are required",
     });
   }
 
@@ -347,7 +329,7 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     return res.json({
-      success: false,
+      success: true,
       message: "Password has been reset successfully",
     });
   } catch (error) {
@@ -357,6 +339,3 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
-
-
-

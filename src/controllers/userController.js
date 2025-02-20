@@ -1,4 +1,4 @@
-import userModel from '../models/userModel.js'
+import userModel from '../models/userModel.js';
 
 export const getUserData = async (req, res) => {
   try {
@@ -8,7 +8,7 @@ export const getUserData = async (req, res) => {
     if (!user) {
       return res.json({
         success: false,
-        message: "User Not Found"
+        message: "User Not Found",
       });
     }
 
@@ -16,13 +16,13 @@ export const getUserData = async (req, res) => {
       success: true,
       userData: {
         name: user.firstName,
-        isAccountVerified: user.isAccountVerified
-      }
+        isAccountVerified: user.isAccountVerified,
+      },
     });
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
