@@ -2,15 +2,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodeMailer.js";
+import dotenv from 'dotenv';
 
-
-
+dotenv.config();
 
 export const register = async (req, res) => {
-  const { firstName,lastName, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
-  if (!firstName ||!lastName || !email || !password) {
-    return res.json({
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({
       success: false,
       message: "Missing details",
     });
@@ -19,62 +19,64 @@ export const register = async (req, res) => {
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
-      res.json({
+      return res.status(400).json({
         success: false,
         message: "User Already Exists",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new userModel({ firstName,lastName, email, password: hashedPassword });
+    const user = new userModel({ firstName, lastName, email, password: hashedPassword });
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
+    // Set cookie with proper production settings
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 1 * 24 * 60 * 60 * 1000,
+      secure: true, // Always use secure in production
+      sameSite: 'none', // Required for cross-site cookies
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/', // Ensure cookie is available across all paths
     });
 
-    //sending welcome email
+    // Send welcome email
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: "Welcome to KodeKami",
-      text: `Welcome to Kodekami website. Your account has been created with email id : ${email}`,
+      subject: "Welcome to CodeKami",
+      text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
     };
 
     await transporter.sendMail(mailOptions);
 
-    return res.json({
+    return res.status(200).json({
       success: true,
+      message: "Registration successful"
     });
   } catch (error) {
-    res.json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.json({
+    return res.status(400).json({
       success: false,
-      message: "email and password are required",
+      message: "Email and password are required",
     });
   }
 
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Invalid email",
       });
@@ -83,7 +85,7 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Invalid password",
       });
@@ -93,24 +95,26 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
+    // Set cookie with proper production settings
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 1 * 24 * 60 * 60 * 1000,
+      secure: true, // Always use secure in production
+      sameSite: 'none', // Required for cross-site cookies
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/', // Ensure cookie is available across all paths
     });
 
-    return res.json({
+    return res.status(200).json({
       success: true,
+      message: "Login successful"
     });
   } catch (error) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 export const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
@@ -243,17 +247,42 @@ export const verifyEmail = async (req, res) => {
 //before this controller function we will execute the middleware and if the middleware will be executed after that this isauth functio will be executed and it will return the respinse sucess true
 export const isAuthenticated = async (req, res) => {
   try {
-    return res.json({
+    const token = req.cookies.token;
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No authentication token",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
+    const user = await userModel.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
       success: true,
+      message: "Authenticated"
     });
   } catch (error) {
-    return res.json({
+    return res.status(401).json({
       success: false,
-      message: error.message,
+      message: "Authentication failed",
     });
   }
 };
-
 //send password reset otp
 export const sendResetOtp = async (req, res) => {
   const { email } = req.body;
