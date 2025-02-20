@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const origin = process.env.NODE_ENV === "production" 
-  ? "https://www.codekami.online" 
+  ? "http://15.206.179.46" 
   : process.env.ORIGIN;
 
 const corsOptions = {
