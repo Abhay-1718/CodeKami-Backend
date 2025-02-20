@@ -13,6 +13,13 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
+<<<<<<< HEAD
+=======
+const origin = process.env.NODE_ENV === "production" 
+  ? "http://15.206.179.46" 
+  : process.env.ORIGIN;
+
+>>>>>>> a625d13579eb78577e92934f9c8ff4a8ebcbca38
 const corsOptions = {
     origin: process.env.NODE_ENV === "production" 
         ? "http://15.206.179.46"  // Just the IP address
