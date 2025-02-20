@@ -50,7 +50,7 @@ export const register = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Registration error:", error);
+  
     return res.json({
       success: false,
       message: error.message,
