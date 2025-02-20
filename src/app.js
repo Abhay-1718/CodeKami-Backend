@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from 'dotenv';
+import cookieParser from "cookie-parser";
 import aiRoutes from './routes/ai.routes.js';
 import connectDb from './config/mongodb.js';
 import authRouter from './routes/authRoute.js';
@@ -36,9 +37,7 @@ app.use((req, res, next) => {
 app.listen(port, async () => {
   try {
     await connectDb();
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Server is running on http://localhost:5000');
-    }
+    console.log('Server is running on http://localhost:5000');
   } catch (error) {
     console.error('Failed to start the server due to database connection issues:', error);
   }

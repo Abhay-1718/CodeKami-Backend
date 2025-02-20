@@ -15,6 +15,7 @@ export const register = async (req, res) => {
       message: "Missing details",
     });
   }
+
   try {
     const existingUser = await userModel.findOne({ email });
 
@@ -33,19 +34,30 @@ export const register = async (req, res) => {
       expiresIn: "1d",
     });
 
-    // Send token in response body
+    // Send welcome email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: "Welcome to CodeKami",
+      text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     return res.status(200).json({
       success: true,
       message: "Registration successful",
       token,
     });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
