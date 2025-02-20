@@ -2,10 +2,7 @@ import userModel from '../models/userModel.js'
 
 export const getUserData = async (req, res) => {
   try {
-    // The user ID is now available from req.user.id
     const userId = req.user.id;
-
-    // Fetch the user from the database using the userId
     const user = await userModel.findById(userId);
 
     if (!user) {

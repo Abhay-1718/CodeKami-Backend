@@ -33,28 +33,11 @@ export const register = async (req, res) => {
       expiresIn: "1d",
     });
 
-    // Set cookie with proper production settings
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // Always use secure in production
-      sameSite: 'none', // Required for cross-site cookies
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/', // Ensure cookie is available across all paths
-    });
-
-    // Send welcome email
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: "Welcome to CodeKami",
-      text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
+    // Send token in response body
     return res.status(200).json({
       success: true,
-      message: "Registration successful"
+      message: "Registration successful",
+      token,
     });
   } catch (error) {
     return res.status(500).json({
@@ -63,6 +46,7 @@ export const register = async (req, res) => {
     });
   }
 };
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -95,18 +79,11 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    // Set cookie with proper production settings
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // Always use secure in production
-      sameSite: 'none', // Required for cross-site cookies
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/', // Ensure cookie is available across all paths
-    });
-
+    // Send token in response body
     return res.status(200).json({
       success: true,
-      message: "Login successful"
+      message: "Login successful",
+      token,
     });
   } catch (error) {
     return res.status(500).json({
@@ -115,14 +92,11 @@ export const login = async (req, res) => {
     });
   }
 };
+
+
+
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    });
-
     return res.json({
       success: true,
       message: "Logged out",
@@ -134,6 +108,7 @@ export const logout = async (req, res) => {
     });
   }
 };
+
 
 //send verification otp to the user's email
 export const sendVerifyOtp = async (req, res) => {
@@ -247,43 +222,26 @@ export const verifyEmail = async (req, res) => {
 //before this controller function we will execute the middleware and if the middleware will be executed after that this isauth functio will be executed and it will return the respinse sucess true
 export const isAuthenticated = async (req, res) => {
   try {
-    const token = req.cookies.token;
-    
+    const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "No authentication token",
-      });
+      return res.status(401).json({ success: false, message: "No authentication token" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded.id) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token",
-      });
+      return res.status(401).json({ success: false, message: "Invalid token" });
     }
 
     const user = await userModel.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(401).json({ success: false, message: "User not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Authenticated"
-    });
+    return res.status(200).json({ success: true, message: "Authenticated" });
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication failed",
-    });
+    return res.status(401).json({ success: false, message: "Authentication failed" });
   }
-};
-//send password reset otp
+};//send password reset otp
 export const sendResetOtp = async (req, res) => {
   const { email } = req.body;
 
