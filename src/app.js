@@ -12,10 +12,9 @@ dotenv.config();
 const app = express();  
 
 const port = process.env.PORT || 5000;
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === "production" 
-        ? "http://15.206.179.46"  // Just the IP address
-        : "http://localhost:5173", // Assuming Vite's default port
+    origin: process.env.ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
