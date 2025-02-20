@@ -13,17 +13,14 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
-const origin = process.env.NODE_ENV === "production" 
-  ? "https://www.codekami.online" 
-  : process.env.ORIGIN;
-
 const corsOptions = {
-    origin: origin,
+    origin: process.env.NODE_ENV === "production" 
+        ? "http://15.206.179.46"  // Just the IP address
+        : "http://localhost:5173", // Assuming Vite's default port
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 };
-
 
 app.use(cors(corsOptions));  // Use the CORS middleware
 app.use(cookieParser());
