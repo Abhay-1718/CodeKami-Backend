@@ -9,7 +9,10 @@ dotenv.config();
 export const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
+  console.log("Registration request received:", { firstName, lastName, email, password });
+
   if (!firstName || !lastName || !email || !password) {
+    console.log("Missing details in registration request");
     return res.json({
       success: false,
       message: "Missing details",
@@ -20,6 +23,7 @@ export const register = async (req, res) => {
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
+      console.log("User already exists");
       return res.json({
         success: false,
         message: "User Already Exists",
@@ -44,19 +48,21 @@ export const register = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
+    console.log("Registration successful");
     return res.json({
       success: true,
       message: "Registration successful",
       token,
     });
   } catch (error) {
-  
+    console.error("Registration error:", error);
     return res.json({
       success: false,
       message: error.message,
     });
   }
 };
+
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
