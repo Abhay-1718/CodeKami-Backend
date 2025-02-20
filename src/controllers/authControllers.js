@@ -10,7 +10,7 @@ export const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({
+    return res.json({
       success: false,
       message: "Missing details",
     });
@@ -20,7 +20,7 @@ export const register = async (req, res) => {
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "User Already Exists",
       });
@@ -44,14 +44,14 @@ export const register = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({
+    return res.json({
       success: true,
       message: "Registration successful",
       token,
     });
   } catch (error) {
     console.error("Registration error:", error);
-    return res.status(500).json({
+    return res.json({
       success: false,
       message: error.message,
     });
@@ -62,7 +62,7 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
+    return res.json({
       success: false,
       message: "Email and password are required",
     });
@@ -71,7 +71,7 @@ export const login = async (req, res) => {
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Invalid email",
       });
@@ -80,7 +80,7 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Invalid password",
       });
@@ -90,13 +90,13 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    return res.status(200).json({
+    return res.json({
       success: true,
       message: "Login successful",
       token,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.json({
       success: false,
       message: error.message,
     });
@@ -220,22 +220,22 @@ export const isAuthenticated = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ success: false, message: "No authentication token" });
+      return res.json({ success: false, message: "No authentication token" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded.id) {
-      return res.status(401).json({ success: false, message: "Invalid token" });
+      return res.json({ success: false, message: "Invalid token" });
     }
 
     const user = await userModel.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({ success: false, message: "User not found" });
+      return res.json({ success: false, message: "User not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Authenticated" });
+    return res.json({ success: true, message: "Authenticated" });
   } catch (error) {
-    return res.status(401).json({ success: false, message: "Authentication failed" });
+    return res.json({ success: false, message: "Authentication failed" });
   }
 };
 

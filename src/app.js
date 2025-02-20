@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  res.status(404).send({ error: 'Route not found' });
+  res.json({ error: 'Route not found' });
 });
 
 app.listen(port, async () => {
