@@ -1,19 +1,12 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import userModel from "../models/userModel.js";
-import transporter from "../config/nodeMailer.js";
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 export const register = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
   console.log("Registration request received:", { firstName, lastName, email, password });
 
+  // Early return if missing details
   if (!firstName || !lastName || !email || !password) {
     console.log("Missing details in registration request");
-    return res.json({
+    return res.status(400).json({
       success: false,
       message: "Missing details",
     });
@@ -24,7 +17,7 @@ export const register = async (req, res) => {
 
     if (existingUser) {
       console.log("User already exists");
-      return res.json({
+      return res.status(409).json({
         success: false,
         message: "User Already Exists",
       });
@@ -39,26 +32,31 @@ export const register = async (req, res) => {
     });
 
     // Send welcome email
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: "Welcome to CodeKami",
-      text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
-    };
+    try {
+      const mailOptions = {
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: "Welcome to CodeKami",
+        text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
+      };
 
-    await transporter.sendMail(mailOptions);
+      await transporter.sendMail(mailOptions);
+    } catch (emailError) {
+      // Log email error but don't fail registration
+      console.error("Failed to send welcome email:", emailError);
+    }
 
     console.log("Registration successful");
-    return res.json({
+    return res.status(201).json({
       success: true,
       message: "Registration successful",
       token,
     });
   } catch (error) {
     console.error("Registration error:", error);
-    return res.json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal server error",
     });
   }
 };
