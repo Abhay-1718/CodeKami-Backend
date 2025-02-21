@@ -18,7 +18,7 @@ app.use(errorHandler);
 
 const corsOptions = {
   origin:'*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
@@ -31,8 +31,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-app.use('/ai', aiRoutes); 
-
+app.use('/ai', aiRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is working');
