@@ -31,7 +31,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-app.use('/api/ai', aiRoutes); 
+app.use('/ai', aiRoutes); 
 
 
 app.get('/', (req, res) => {

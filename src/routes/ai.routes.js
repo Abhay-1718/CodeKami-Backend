@@ -1,11 +1,10 @@
+
 import express from 'express';
 import aiController from '../controllers/ai.controller.js';
 
 const router = express.Router();
 
-router.post('/get-review', (req, res, next) => {
-  console.log('Received request:', req.body); // Debug log
-  aiController.getReview(req, res, next);
-});
+// Define the route for generating the AI response
+router.post('/get-review', aiController.getReview);
 
 export default router;
