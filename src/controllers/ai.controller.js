@@ -1,20 +1,21 @@
 
-import generateContent from '../services/ai.service.js';  // Correct import
+import generateContent from '../services/ai.service.js';  
 
 const getReview = async (req, res) => {
-  const code = req.body.code;
-
-  if (!code) {
-    return res.status(400).send("Prompt is required");
-  }
-
   try {
-    // Call the generateContent function from aiService
+    const { code } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Code is required' });
+    }
+
+    console.log('Processing code review request'); // Debug log
     const aiResponse = await generateContent(code);
-    res.json({ response: aiResponse });
+    
+    return res.json({ response: aiResponse });
   } catch (error) {
-    console.error('Error with AI service:', error);
-    res.status(500).send("Something went wrong with AI service");
+    console.error('AI Service Error:', error);
+    return res.status(500).json({ error: 'AI service error' });
   }
 };
 
