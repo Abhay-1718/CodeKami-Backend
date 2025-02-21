@@ -1,18 +1,18 @@
 import userModel from '../models/userModel.js';
 
-export const getUserData = async (req, res) => {
+export const getUserData = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await userModel.findById(userId);
 
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "User Not Found",
       });
     }
 
-    res.json({
+    return res.status(200).json({
       success: true,
       userData: {
         name: user.firstName,
@@ -20,9 +20,6 @@ export const getUserData = async (req, res) => {
       },
     });
   } catch (error) {
-    res.json({
-      success: false,
-      message: error.message,
-    });
+    next(error); // Pass to error handler
   }
 };

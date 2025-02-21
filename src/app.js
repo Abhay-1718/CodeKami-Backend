@@ -11,6 +11,15 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Custom error response handler
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Internal Server Error'
+  });
+};
+
 const corsOptions = {
   origin: process.env.ORIGIN || 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -18,9 +27,11 @@ const corsOptions = {
   credentials: true,
 };
 
+// Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Routes
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 app.use('/ai', aiRoutes);
@@ -29,17 +40,27 @@ app.get('/', (req, res) => {
   res.send('API is working');
 });
 
-app.use((req, res, next) => {
-  res.json({ error: 'Route not found' });
+// 404 handler - Must come after all valid routes
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-app.listen(port, async () => {
+// Error handler - Must be last middleware
+app.use(errorHandler);
+
+// Server startup
+const startServer = async () => {
   try {
     await connectDb();
-    console.log(`Server is running on http://localhost:${port}`);
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
   } catch (error) {
-    console.error('Failed to start the server due to database connection issues:', error);
+    console.error('Failed to start the server:', error);
+    process.exit(1);
   }
-});
+};
+
+startServer();
 
 export default app;

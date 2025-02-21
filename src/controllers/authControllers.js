@@ -1,22 +1,25 @@
-export const register = async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import userModel from "../models/userModel.js";
+import transporter from "../config/nodeMailer.js";
+import dotenv from 'dotenv';
 
-  console.log("Registration request received:", { firstName, lastName, email, password });
+dotenv.config();
 
-  // Early return if missing details
-  if (!firstName || !lastName || !email || !password) {
-    console.log("Missing details in registration request");
-    return res.status(400).json({
-      success: false,
-      message: "Missing details",
-    });
-  }
-
+export const register = async (req, res, next) => {
   try {
+    const { firstName, lastName, email, password } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing details",
+      });
+    }
+
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
-      console.log("User already exists");
       return res.status(409).json({
         success: false,
         message: "User Already Exists",
@@ -24,43 +27,46 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new userModel({ firstName, lastName, email, password: hashedPassword });
+    const user = new userModel({ 
+      firstName, 
+      lastName, 
+      email, 
+      password: hashedPassword 
+    });
+    
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+    const token = jwt.sign(
+      { id: user._id }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: "1d" }
+    );
+
+    // Send welcome email in background
+    setImmediate(async () => {
+      try {
+        const mailOptions = {
+          from: process.env.SENDER_EMAIL,
+          to: email,
+          subject: "Welcome to CodeKami",
+          text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
+        };
+        await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+        console.error("Welcome email failed:", emailError);
+      }
     });
 
-    // Send welcome email
-    try {
-      const mailOptions = {
-        from: process.env.SENDER_EMAIL,
-        to: email,
-        subject: "Welcome to CodeKami",
-        text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
-      };
-
-      await transporter.sendMail(mailOptions);
-    } catch (emailError) {
-      // Log email error but don't fail registration
-      console.error("Failed to send welcome email:", emailError);
-    }
-
-    console.log("Registration successful");
     return res.status(201).json({
       success: true,
       message: "Registration successful",
       token,
     });
+
   } catch (error) {
-    console.error("Registration error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    next(error);
   }
 };
-
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
