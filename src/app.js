@@ -5,20 +5,16 @@ import connectDb from './config/mongodb.js';
 import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoutes.js';
 import aiRoutes from './routes/ai.routes.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Custom error response handler
-const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Internal Server Error'
-  });
-};
+app.use(errorHandler);
+
+
 
 const corsOptions = {
   origin: process.env.ORIGIN || 'http://localhost:5173',

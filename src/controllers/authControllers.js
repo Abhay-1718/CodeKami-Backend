@@ -2,71 +2,70 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodeMailer.js";
-import dotenv from 'dotenv';
+import { asyncHandler } from '../middlewares/asyncHandler.js';
 
-dotenv.config();
-
-export const register = async (req, res, next) => {
+const sendWelcomeEmail = async (email) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
-
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing details",
-      });
-    }
-
-    const existingUser = await userModel.findOne({ email });
-
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User Already Exists",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new userModel({ 
-      firstName, 
-      lastName, 
-      email, 
-      password: hashedPassword 
-    });
-    
-    await user.save();
-
-    const token = jwt.sign(
-      { id: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: "1d" }
-    );
-
-    // Send welcome email in background
-    setImmediate(async () => {
-      try {
-        const mailOptions = {
-          from: process.env.SENDER_EMAIL,
-          to: email,
-          subject: "Welcome to CodeKami",
-          text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
-        };
-        await transporter.sendMail(mailOptions);
-      } catch (emailError) {
-        console.error("Welcome email failed:", emailError);
-      }
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Registration successful",
-      token,
-    });
-
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: "Welcome to CodeKami",
+      text: `Welcome to Codekami website. Your account has been created with email id : ${email}`,
+    };
+    await transporter.sendMail(mailOptions);
   } catch (error) {
-    next(error);
+    console.error('Welcome email failed:', error);
   }
 };
+
+export const register = asyncHandler(async (req, res) => {
+  const { firstName, lastName, email, password } = req.body;
+
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing details",
+    });
+  }
+
+  const existingUser = await userModel.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({
+      success: false,
+      message: "User Already Exists",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const user = new userModel({ 
+    firstName, 
+    lastName, 
+    email, 
+    password: hashedPassword 
+  });
+  
+  await user.save();
+
+  const token = jwt.sign(
+    { id: user._id }, 
+    process.env.JWT_SECRET, 
+    { expiresIn: "1d" }
+  );
+
+  res.status(201).json({
+    success: true,
+    message: "Registration successful",
+    token,
+  });
+
+  // Send email after response
+  sendWelcomeEmail(email);
+});
+
+
+
+
+
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
